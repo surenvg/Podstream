@@ -190,6 +190,8 @@ import {
         try {
           signIn({ email, password }).then((res) => {
             if (res.status === 200) {
+              console.log(res.data.token)
+              sessionStorage.setItem('token', res.data.token);
               dispatch(loginSuccess(res.data));
               setLoading(false);
               setDisabled(false);

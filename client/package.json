@@ -10,6 +10,7 @@
     "@mui/styled-engine": "^5.12.0",
     "@react-oauth/google": "^0.10.0",
     "@reduxjs/toolkit": "^1.9.5",
+    "@supabase/supabase-js": "^2.47.6",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

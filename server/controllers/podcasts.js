@@ -8,16 +8,35 @@ import User from "../models/User.js";
 export const createPodcast = async (req, res, next) => {
     try {
         const user = await User.findById(req.user.id);
+        console.log(req.body.episodes)
 
         let episodeList = []
-        await Promise.all(req.body.episodes.map(async (item) => {
+        // await Promise.all(req.body.episodes.map(async (item) => {
 
-            const episode = new Episodes(
-                { creator: user.id, ...item }
-            );
-            const savedEpisode = await episode.save();
-            episodeList.push(savedEpisode._id)
-        }));
+        //     const episode = new Episodes(
+        //         { creator: user.id, ...item }
+        //     );
+        //     const savedEpisode = await episode.save();
+        //     episodeList.push(savedEpisode._id)
+        // }));
+        await Promise.all(
+            req.body.episodes.map(async (item) => {
+                try {
+                    if (!item.name || !item.desc) {
+                        throw new Error("Each episode must have a 'name' and 'desc'.");
+                    }
+                    const episode = new Episodes({
+                        creator: user.id, 
+                        ...item,
+                    });
+                    const savedEpisode = await episode.save();
+                    episodeList.push(savedEpisode._id);
+                } catch (err) {
+                    console.error("Error saving an episode:", err.message);
+                    // You can choose to throw here if you want the entire operation to fail on an error
+                }
+            })
+        );
 
         // Create a new podcast
         const podcast = new Podcasts(

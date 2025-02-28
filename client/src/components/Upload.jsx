@@ -8,12 +8,14 @@ import {
     uploadBytesResumable,
     getDownloadURL,
 } from "firebase/storage";
-import app from "../firebase";
+import app from "../supabase";
 import ImageSelector from "./ImageSelector";
 import { useDispatch } from "react-redux";
 import { openSnackbar } from "../redux/snackbarSlice";
 import { createPodcast } from '../api';
 import { Category } from '../utils/Data';
+import { supabase } from '../supabase';
+
 
 const Container = styled.div`
 width: 100%;
@@ -237,40 +239,36 @@ const Upload = ({ setUploadOpen }) => {
         }
     }, [podcast]);
 
-    const uploadFile = (file, index) => {
-        const storage = getStorage(app);
-        const fileName = new Date().getTime() + file.name;
-        const storageRef = ref(storage, fileName);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
-        uploadTask.on(
-            "state_changed",
-            (snapshot) => {
-                const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                podcast.episodes[index].file.uploadProgress = Math.round(progress);
-                setPodcast({ ...podcast, episodes: podcast.episodes });
-                switch (snapshot.state) {
-                    case "paused":
-                        console.log("Upload is paused");
-                        break;
-                    case "running":
-                        console.log("Upload is running");
-                        break;
-                    default:
-                        break;
-                }
-            },
-            (error) => { },
-            () => {
-                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-
-                    const newEpisodes = podcast.episodes;
-                    newEpisodes[index].file = downloadURL;
-                    setPodcast({ ...podcast, episodes: newEpisodes });
-                });
-            }
-        );
+    const uploadFile = async (file, index) => {
+        const fileName = `${file.name}`;
+        console.log(fileName)
+        const { data, error } = await supabase.storage
+            .from('podcast-files')
+            .upload(fileName, file);
+    
+        if (error) {
+            console.error('Error uploading file:', error);
+            return;
+        }
+    
+        const publicUrl = "https://kcfspaikpvobylaqgpna.supabase.co/storage/v1/object/public/podcast-files/" + fileName.split('').map(char => (char === ' ' ? '%20' : char)).join('');
+        
+        console.log(publicUrl)
+    
+        const { error: dbError } = await supabase.from('podcasts').insert({
+            fileName,
+            downloadURL: publicUrl,
+            uploadedAt: new Date().toISOString(),
+        });
+    
+        if (dbError) {
+            console.error('Error saving metadata:', dbError);
+            return;
+        }
+    
+        const updatedEpisodes = [...podcast.episodes];
+        updatedEpisodes[index].file = publicUrl ;
+        setPodcast({ ...podcast, episodes: updatedEpisodes });
     };
 
     const createpodcast = async () => {

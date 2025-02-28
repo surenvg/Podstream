@@ -252,6 +252,18 @@ const Dashboard = ({ setSignInOpen }) => {
               ))}
             </Podcasts>
           </FilterContainer>
+          <FilterContainer>
+            <Link to={`/showpodcasts/education`} style={{ textDecoration: "none" }}>
+              <Topic>Education
+                <Span>Show All</Span>
+              </Topic>
+            </Link>
+            <Podcasts>
+              {sports.slice(0, 10).map((podcast) => (
+                <PodcastCard podcast={podcast} user={user} setSignInOpen={setSignInOpen} />
+              ))}
+            </Podcasts>
+          </FilterContainer>
         </>
       }
     </DashboardMain>

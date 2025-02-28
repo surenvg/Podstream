@@ -5,7 +5,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 
 //routes
-import authRoutes from './routes/auth.js';
+import authRoutes from './routes/auth.js'; 
 import podcastsRoutes from './routes/podcast.js';
 import userRoutes from './routes/user.js';
 
@@ -19,18 +19,18 @@ const corsConfig = {
     origin: true,
 };
 app.use(cors(corsConfig));
-// app.use(morgan('tiny'));
-// app.disable('x-powered-by');
-// app.use(function (request, response, next) {
-//     response.header("Access-Control-Allow-Origin", "*");
-//     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-//     next();
-//   });
+app.use(morgan('tiny'));
+app.disable('x-powered-by');
+app.use(function (request, response, next) {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
 
 const port = process.env.PORT || 8700;
 
-const connect = () => {
-    mongoose.set('strictQuery', true);
+const connect = () => { 
+    // mongoose.set('strictQuery', true);
     mongoose.connect(process.env.MONGO_URL).then(() => {
         console.log('MongoDB connected');
     }).catch((err) => {
